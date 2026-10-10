@@ -1,0 +1,92 @@
+# LifeOS · Sovereign
+
+> 你的人生操作系统 —— 数据留在你自己手里。
+
+一个**本地优先（local-first）**的个人成长管理应用：健康、目标、每日记录、数据分析、AI 助手，全部跑在你自己的机器上，数据存进你自己的 MySQL，而不是任何人的云。
+
+## 为什么选它
+
+大多数同类产品把你的数据锁在别人的服务器里——想导出难、隐私靠对方一句话。LifeOS 走的是另一条路：
+
+| 维度 | 常见产品 | LifeOS |
+| --- | --- | --- |
+| 数据存储 | 厂商云数据库 | 你自己的 MySQL |
+| 账号 | 必须注册第三方账号 | 无需注册，本地即用 |
+| 数据迁移 | 导出受限、格式封闭 | 数据就是 SQL，想导出导出、想备份备份 |
+| 代码 | 闭源黑盒 | 完全开源，可审计 |
+| 联网依赖 | 断网不可用 | 核心功能断网也能跑 |
+
+**一句话：你的数据主权，在你手里，不在别人的服务器上。**
+
+## 功能
+
+- 📝 **每日记录**：学习 / 创作 / 阅读 / 运动 / 睡眠 / 心情 / 能量，一条记录全天状态。
+- 🎯 **目标管理**：终极 → 长期 → 中期 → 短期，层层拆解、自由添加、进度条随手拖。
+- 📊 **数据分析**：近 30 天行为趋势可视化（ECharts）+ 目标进度一览。
+- 🤖 **AI 助手**：基于你的真实数据做个性化分析与建议。
+
+## 关于隐私（诚实说明）
+
+- 你的**原始数据**（记录、目标、档案）只存本机 MySQL，不上传任何云。
+- 使用 **AI 助手**时，后端会把**聚合后的统计摘要**发给 DeepSeek 的 API 生成分析（可选功能，不用它就不联网）。
+- DeepSeek API 密钥和 MySQL 密码都保存在本地 `.env`（已被 Git 忽略），不会进仓库。
+
+## 技术栈
+
+Vue 3 · FastAPI · MySQL · ECharts · DeepSeek
+
+## 项目结构
+
+```
+.
+├── backend/
+│   ├── main.py       # 路由（每日记录 / 目标 CRUD / 数据分析 / AI）
+│   ├── config.py     # 从 .env 读配置
+│   ├── database.py   # MySQL 连接
+│   ├── stats.py      # 数据聚合
+│   ├── llm.py        # DeepSeek 调用
+│   └── schema.sql    # 数据库表结构
+└── frontend/
+    └── src/views/    # 首页 / 个人档案 / 每日记录 / 目标 / 数据分析 / AI 助手
+```
+
+## 快速开始
+
+### 1. 数据库
+
+在 MySQL 里建库并导入表结构：
+
+```sql
+CREATE DATABASE lifeos CHARACTER SET utf8mb4;
+```
+
+然后导入表结构（用 MySQL 客户端执行 `backend/schema.sql`）。
+
+### 2. 后端
+
+```bash
+cd backend
+python -m venv venv
+venv/Scripts/pip install -r requirements.txt     # Windows；Linux/Mac 用 venv/bin/pip
+cp .env.example .env                              # 填上你的 DEEPSEEK_API_KEY 和 MySQL 密码
+venv/Scripts/python -m uvicorn main:app --port 8000
+```
+
+### 3. 前端
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+浏览器打开 http://localhost:5173 。
+
+## 安全提示
+
+- 前后端默认只绑定 `localhost`，仅本机可访问；别用 `--host 0.0.0.0` 暴露到公网。
+- 把 MySQL 的 `bind-address` 设为 `127.0.0.1`，避免局域网暴露。
+
+## License
+
+[MIT](LICENSE)
